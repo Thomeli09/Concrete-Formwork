@@ -1,5 +1,8 @@
 # Concrete Formwork
 
+[![Python](https://img.shields.io/badge/Python-3.15%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-GPL--3.0--or--later-blue)](LICENSE)
+
 Shapely-based analysis of **2D formwork sections**, sequential concrete pours,
 concrete volume, and hydrostatic pressure on the formwork walls. Includes
 Matplotlib figures and per-wall CSV exports.
