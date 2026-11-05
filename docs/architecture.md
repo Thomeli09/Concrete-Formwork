@@ -1,74 +1,79 @@
-# Architecture and extension guide
+# Architecture (v0.2.0)
 
-The old `GeometryLib`, `ElementLib`, `LoadingLib`, `MaterialLib`, and generic
-plotting helpers are intentionally **not included**. The revised package has
-one explicit responsibility: filling a Shapely-based 2D formwork cavity and
-calculating hydrostatic loads from the resulting concrete layers.
-
-## Data flow
+## Separation of concerns
 
 ```text
-Formwork.from_profile(...) ───┐
-                              ├─> Formwork.cavity: shapely.Polygon
-Formwork.from_polygon(...) ───┘       │
-                                     ├─> filled_region(elevation)
-                                     ├─> volume_at(elevation)
-                                     └─> walls (coordinates + outward normals)
-                                             │
-Concrete(name, unit_weight) ───┐              │
-                               ├─> PouringSimulation
-Sequential level/volume pours ┘       │
-                                      ├─> Pour.region (Shapely difference)
-                                      ├─> stage-specific filled volume
-                                      ├─> hydrostatic_pressure(z)
-                                      ├─> wall_loads() (analytic integration)
-                                      └─> summary(stage)
-                                               │
-                              ┌────────────────┴────────────────┐
-                         plot_section(...)                wall_load_records(...)
-                         plot_pressure_profile(...)       export_wall_loads_csv(...)
+Shapely Formwork + SoilRegion / Brace             Concrete
+                │                                    │
+                └─────────── PouringSimulation ───────┘
+                                   │
+             per-Pour pressure law (PressureLaw protocol)
+             Hydrostatic, Capped, Power, Tabulated, Callable
+                                   │
+                    wall-specific optional modifier
+                    (wall, s, base_p) -> Pa
+                                   │
+                         WallPressureProfile
+                    ordered (s_m, pressure_Pa)
+                                   │
+                   adaptive quadrature over knots
+                 ∫p ds, ∫s*p ds, resultant, center
+                    │                       │
+                CSV export             section.py layers
+                                            │
+                              generic plot_2d.py & plot_basic.py
+                                            │
+                                  Matplotlib Axes artists
 ```
 
-## Core invariants
+The pressure model is independent of Matplotlib and does not assume a linear
+profile. Each straight wall is parameterized by curvilinear distance `s`
+from its `Wall.start` to `Wall.end`. The value returned for each point is the
+sum of the selected pours' contributions, potentially transformed by a
+wall-local function.
 
-1. Coordinates use metres, `(x, z)`. The cavity must be a valid polygon with
-   positive area. There is no custom geometry engine.
-2. `Formwork.from_profile` requires two distinct endpoints at the **same
-   uppermost elevation** and introduces an implicit non-structural top edge.
-   `Formwork.from_polygon` accepts a closed polygon and its holes directly.
-3. Pours are appended sequentially. No pour overlaps earlier concrete in area.
-   An over-rim level is clipped to the cavity top (not treated as overflow).
-4. Each pressure-bearing wall is stored as a straight segment with a normal
-   pointing **out of the concrete**, invariant to the input vertex order.
-5. Pressure is computed per material **in N/m²**, proportional to unit weight
-   **in N/m³**. Individual wall forces are in N for the full section width.
-6. Wall segments are subdivided at concrete interfaces and the free surface,
-   so the pressure integral and application point are analytical rather than
-   estimated by plotting resolution.
-7. The computational core depends only on Shapely, with no Matplotlib global
-   state. Rendering returns a Matplotlib `(Figure, Axes)` without calling show.
-8. Every staged summary is immutable. The simulation can only grow by adding
-   another pour; prior stage outputs remain reproducible.
+### Why integrate separately from drawing samples?
 
-## Next extensions
+A polynomial pressure such as `p(s)=1000*s**2` cannot be integrated
+accurately by connecting two endpoint values with a straight line.
+`wall_loads(samples_per_wall=2)` can intentionally return only two
+visualization samples but still calculate an accurate force and center of
+pressure with adaptive Simpson integration. Users may control display nodes
+with `nodes_by_wall={index: [s1, s2, ...]}`. Concrete layer and constitutive
+breakpoints are *also* included automatically, ensuring that piecewise models
+are integrated across separate branches.
 
-- **Time evolution:** separate placement events from instantaneous stage state;
-  introduce curing, concrete age, pump rate, and wall pressure envelope models.
-- **Fresh vs set material:** add an explicit pressure model interface and a
-  state variable per layer. Do not emulate set concrete by simply deleting its
-  hydrostatic contribution: transmission of stress and structural support would
-  have to be modelled.
-- **Structural checks:** define formwork supports and members separately; do
-  not equate hydrostatic loads with capacity assessment or standard compliance.
-- **Topology:** model gravity-driven access to disconnected recesses rather
-  than prescribing a shared free-surface elevation for all components.
-- **3D geometry:** use solids/meshes instead of multiplying section area by a
-  fixed width; Shapely itself is predominantly planar.
+### Stability assumptions
 
-## Testing
+- All pressures are gauge, scalar, nonnegative and directed along the outward
+  unit normal on the wetted wall face. Forces always integrate over the
+  out-of-plane formwork width.
+- Each law receives its layer's `depth` (capped to that layer's height),
+  physical layer height, and concrete unit weight. Contributions below a layer
+  are saturated and passed to the lower formwork surface.
+- Pressure laws are mathematical options, **not standards-based concrete
+  setting, consolidation, or rheological models**.
+- The cavity, concrete regions and physical wall geometry are immutable;
+  stages append pours rather than replacing existing geometry.
+- The soil/bracing models are 2D drawings only and have no mechanical
+  connectivity to the pressure solver.
 
-`pytest` checks a rectangle against closed-form results (area, volume,
-triangular wall loading and center of pressure), stepped/concave polygons,
-polygon holes, stage selection, differing material unit weights, over-rim
-clipping, invalid inputs, and headless plotting/CSV smoke tests. Compare any
-future pressure model to appropriate experimental or standards-based benchmarks.
+### Extending pressure
+
+For arbitrary layer laws, implement `PressureLaw.pressure(depth, *, height,
+unit_weight) -> Pa` and `break_depths(*, height, unit_weight) -> tuple[m,...]`,
+or use `CallablePressure(function, knots=...)`. For arbitrary wall-local laws,
+use `wall_pressure_function(wall, s, base_pressure) -> Pa` at simulation creation.
+For discontinuous/non-smooth custom pressure, supply knots where the expression
+changes, check convergence, and compare against reference cases. A future
+finite-element/continuum solver could emit wall pressure functions or profile
+samples without changing the visualization layer.
+
+### Testing
+
+The test suite includes linear hydrostatic forces/centers, exact polynomial
+integrals for quadratic distributions, capped pressure changes, measured
+piecewise triangles, per-pour additive selections, wall-local corrections,
+user-defined sampling nodes, Shapely polygon holes, and headless independent
+plotting. The package still needs external engineering validation before use
+for structural design.

@@ -836,3 +836,85 @@ __all__ = [
     "plot_bars", "plot_histogram", "plot_histogram2d", "plot_pie",
     "plot_image", "draw_circle",
 ]
+
+
+def draw_geometry(
+    ax: Axes,
+    geometry: Any,
+    *,
+    parameters: PlotParameters | None = None,
+    color: ColorValue | None = None,
+    edgecolor: ColorValue | None = None,
+    filled: bool = True,
+    label: str | None = None,
+    zorder: float = 1,
+) -> list[Patch | Line2D]:
+    """Draw Shapely polygon(s) with correctly hollow interior rings, or lines.
+
+    The generic Matplotlib helper understands standard Shapely Polygon,
+    MultiPolygon, LineString, MultiLineString and GeometryCollection objects.
+    It has no dependency on formwork, soil, or engineering models. Returns
+    artists for downstream customization, including holes drawn transparently.
+    """
+    from matplotlib.path import Path as MplPath
+    from matplotlib.patches import PathPatch
+    from shapely.geometry import GeometryCollection, LineString, MultiLineString
+    from shapely.geometry import MultiPolygon, Polygon as ShapelyPolygon
+    from shapely.geometry.polygon import orient
+
+    opts = _options(parameters)
+    face = color if color is not None else opts.color_at()
+    edge = edgecolor if edgecolor is not None else face
+    artists: list[Patch | Line2D] = []
+    labeled = False
+
+    def add_one(item: Any) -> None:
+        nonlocal labeled
+        if item.is_empty:
+            return
+        artist_label = label if not labeled else None
+        if isinstance(item, ShapelyPolygon):
+            polygon = orient(item, sign=1.0)
+            vertices: list[tuple[float, float]] = []
+            codes: list[int] = []
+            for ring in (polygon.exterior, *polygon.interiors):
+                xy = [(float(x), float(y)) for x, y in ring.coords]
+                vertices.extend(xy)
+                codes.extend([MplPath.MOVETO] + [MplPath.LINETO] * (len(xy) - 2) + [MplPath.CLOSEPOLY])
+            patch = PathPatch(
+                MplPath(vertices, codes),
+                facecolor=face if filled else 'none',
+                edgecolor=edge if edge is not None else 'none',
+                linewidth=opts.linewidth,
+                linestyle=opts.linestyle,
+                alpha=opts.alpha,
+                hatch=opts.hatch,
+                label=artist_label,
+                zorder=zorder,
+            )
+            ax.add_patch(patch)
+            artists.append(patch)
+            labeled = True
+        elif isinstance(item, LineString):
+            xy = list(item.coords)
+            if not xy:
+                return
+            line = plot_line(
+                ax, [point[0] for point in xy], [point[1] for point in xy],
+                parameters=opts, label=artist_label, color=edge,
+            )
+            line.set_zorder(zorder)
+            artists.append(line)
+            labeled = True
+        elif isinstance(item, (MultiPolygon, MultiLineString, GeometryCollection)):
+            for sub_geometry in item.geoms:
+                add_one(sub_geometry)
+        else:
+            raise TypeError(f'Unsupported Shapely geometry: {type(item).__name__}')
+
+    add_one(geometry)
+    ax.autoscale_view()
+    return artists
+
+
+__all__.append('draw_geometry')
