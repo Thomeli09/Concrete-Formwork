@@ -1,3 +1,0 @@
-# Contains the different rheological models used for the simulation of pressure o formwork.
-# - hydrostatic: The hydrostatic model assumes that the pressure on the formwork is due to the weight of the concrete above it. This model is suitable for situations where the concrete is poured in a vertical formwork and the pressure is mainly due to the weight of the concrete.
-# - others preimplemented models: The other models are based on the rheological properties of the concrete and the formwork. These models take into account the viscosity, yield stress, and other properties of the concrete and the formwork to calculate the pressure on the formwork.

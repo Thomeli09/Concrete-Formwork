@@ -1,45 +1,37 @@
 [build-system]
-requires = ["setuptools>=77"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "concrete-formwork"
-version = "0.0.1"
-description = "A concrete formwork computational model for the computation of the pressure exerted by fresh concrete on formwork."
+version = "0.1.0"
+description = "Shapely-based staged concrete filling, hydrostatic pressure and 2D formwork visualization"
 readme = "README.md"
 requires-python = ">=3.15"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
-authors = [
-    { name = "Eliott Thommes" },
-]
+authors = [{ name = "Eliott Thommes" }]
 dependencies = [
-    "numpy>=2.5.4",
-    "matplotlib>=3.11.2",
+    "shapely>=2.2.0",  # First release with CPython 3.15 wheels.
 ]
-keywords = [
-    "concrete", "formwork", "pressure", "simulation", "matplotlib", "visualization",
-]
+keywords = ["concrete", "formwork", "shapely", "hydrostatic", "pressure", "simulation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.15",
     "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering",
 ]
 
 [project.optional-dependencies]
-data = ["pandas>=3.0.6"]
-rich-text = ["highlight-text"]
+plot = ["matplotlib>=3.11.2"]
 dev = [
-    "pandas>=3.0.6",
-    "pytest",
-    "pytest-cov",
-    "ruff",
-    "sphinx",
-    "build",
+    "matplotlib>=3.11.2",
+    "pytest>=9",
+    "pytest-cov>=7",
+    "ruff>=0.17",
+    "build>=1.3",
 ]
 
 [project.urls]
@@ -53,8 +45,11 @@ include = ["concrete_formwork*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["--import-mode=importlib"]
+addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
+target-version = "py315"
 
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B", "UP", "SIM"]

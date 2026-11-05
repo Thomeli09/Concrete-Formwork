@@ -22,28 +22,17 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="examples\advanced_simulation.py" />
     <Compile Include="examples\basic_simulation.py" />
-    <Compile Include="src\concrete_formwork\geometry\ElementLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\GeometryLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\LoadingLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\MathOperationLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\MeshLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\RheologyLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\SoilLib.py" />
-    <Compile Include="src\concrete_formwork\geometry\StructuralLib.py" />
+    <Compile Include="examples\complex_profile.py" />
+    <Compile Include="src\concrete_formwork\geometry\formwork.py" />
     <Compile Include="src\concrete_formwork\geometry\__init__.py" />
-    <Compile Include="src\concrete_formwork\materials\soil.py" />
-    <Compile Include="src\concrete_formwork\materials\formwork.py" />
     <Compile Include="src\concrete_formwork\materials\concrete.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\concrete_formwork\materials\MaterialLib.py" />
-    <Compile Include="src\concrete_formwork\rheological_model\rheological_model.py" />
-    <Compile Include="src\concrete_formwork\rheological_model\__init__.py" />
     <Compile Include="src\concrete_formwork\materials\__init__.py" />
-    <Compile Include="src\concrete_formwork\simulation\mesh.py" />
-    <Compile Include="src\concrete_formwork\simulation\fem.py" />
+    <Compile Include="src\concrete_formwork\simulation\export.py" />
+    <Compile Include="src\concrete_formwork\simulation\model.py" />
     <Compile Include="src\concrete_formwork\simulation\__init__.py" />
     <Compile Include="src\concrete_formwork\utils\data.py" />
     <Compile Include="src\concrete_formwork\utils\__init__.py" />
@@ -51,10 +40,13 @@
     <Compile Include="src\concrete_formwork\visualization\plot_3d.py" />
     <Compile Include="src\concrete_formwork\visualization\plot_basic.py" />
     <Compile Include="src\concrete_formwork\visualization\plot_parameters.py" />
+    <Compile Include="src\concrete_formwork\visualization\section.py" />
+    <Compile Include="src\concrete_formwork\visualization\__init__.py" />
     <Compile Include="src\concrete_formwork\__init__.py" />
+    <Compile Include="tests\conftest.py" />
     <Compile Include="tests\test_geometry.py" />
-    <Compile Include="tests\test_materials.py" />
     <Compile Include="tests\test_simulation.py" />
+    <Compile Include="tests\test_visualization.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="docs\" />
@@ -63,7 +55,6 @@
     <Folder Include="src\concrete_formwork\" />
     <Folder Include="src\concrete_formwork\geometry\" />
     <Folder Include="src\concrete_formwork\materials\" />
-    <Folder Include="src\concrete_formwork\rheological_model\" />
     <Folder Include="src\concrete_formwork\simulation\" />
     <Folder Include="src\concrete_formwork\utils\" />
     <Folder Include="src\concrete_formwork\visualization\" />
@@ -71,14 +62,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CITATION.cff" />
+    <Content Include="docs\architecture.md" />
     <Content Include="LICENSE" />
     <Content Include="pyproject.toml" />
     <Content Include="README.md" />
     <Content Include="requirements-dev.txt" />
     <Content Include="requirements.txt" />
-    <Content Include="src\concrete_formwork\geometry\geometry.md" />
-    <Content Include="src\concrete_formwork\Structure.md" />
-    <Content Include="src\concrete_formwork\visualization\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

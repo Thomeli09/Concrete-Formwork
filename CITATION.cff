@@ -10,13 +10,16 @@ authors:
   - family-names: Thommes
     given-names: Eliott
     orcid: https://orcid.org/0009-0005-0697-2438
-version: 0.0.1
+version: 0.1.0
 date-released: 2026-10-22
 license: GPL-3.0-or-later
 repository-code: https://github.com/Thomeli09/concrete-formwork
 url: https://github.com/Thomeli09/concrete-formwork
 keywords:
-  - scheduling
+  - concrete
+  - formwork
+  - shapely
+  - hydrostatic pressure
   - matplotlib
 
 # Zenodo integration (optional):
