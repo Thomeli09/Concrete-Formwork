@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "concrete-formwork"
-version = "0.1.0"
-description = "Shapely-based staged concrete filling, hydrostatic pressure and 2D formwork visualization"
+version = "0.2.0"
+description = "Shapely formwork, staged concrete pours, extensible pressure laws and composable plotting"
 readme = "README.md"
 requires-python = ">=3.15"
 license = "GPL-3.0-or-later"

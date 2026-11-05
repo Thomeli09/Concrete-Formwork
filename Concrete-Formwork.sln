@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37614.0 d17.14
+VisualStudioVersion = 17.14.37614.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Technologie des bétons et matériaux nouveaux - Coffrage", "Technologie des bétons et matériaux nouveaux - Coffrage.pyproj", "{73528D4F-8AA3-4160-AF76-63341D63DB6D}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Concrete-Formwork", "Concrete-Formwork.pyproj", "{73528D4F-8AA3-4160-AF76-63341D63DB6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
